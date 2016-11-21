@@ -22,6 +22,6 @@ test:
 production:
   clients:
     default:
-      uri: mongodb://deploy:sharovik@ds159237.mlab.com:59237/racer_db
+      uri: <%= ENV['MONGOLAB_URI'] %>
       options:
         connect_timeout: 15

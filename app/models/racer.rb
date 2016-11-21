@@ -34,14 +34,14 @@ class Racer
   end
 
   def self.all(prototype={}, sort={}, skip=0, limit=nil)
-    result = collection.find(prototype).sort(sort).skip(skip)
-    result = result.limit(limit) if !limit.nil?
+    results = collection.find(prototype).sort(sort).skip(skip)
+    results = results.limit(limit) if !limit.nil?
 
-    return result
+    return results
   end
 
   def self.find id
-    result = collection.find(_id: BSON.ObjectId(id)).first
+    result = collection.find(_id: BSON::ObjectId.from_string(id)).first
     return result.nil? ? nil : Racer.new(result)
   end
 
@@ -78,7 +78,7 @@ class Racer
 
     params.slice!(:number, :first_name, :last_name, :gender, :group, :secs) if !params.nil?
 
-    self.class.collection.find(_id: BSON::ObjectId.from_string(@id)).update_one(:$set => params)
+    self.class.collection.find(_id: BSON::ObjectId.from_string(@id)).update_one(params)
   end
 
   def destroy
