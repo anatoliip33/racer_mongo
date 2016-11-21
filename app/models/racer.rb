@@ -41,7 +41,7 @@ class Racer
   end
 
   def self.find id
-    result = collection.find(_id: BSON::ObjectId.from_string(id)).first
+    result = collection.find(_id: BSON::ObjectId(id)).first
     return result.nil? ? nil : Racer.new(result)
   end
 
