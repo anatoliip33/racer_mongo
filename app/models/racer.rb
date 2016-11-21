@@ -78,7 +78,7 @@ class Racer
 
     params.slice!(:number, :first_name, :last_name, :gender, :group, :secs) if !params.nil?
 
-    self.class.collection.find(_id: BSON::ObjectId.from_string(@id)).update_one($set=>params)
+    self.class.collection.find(_id: BSON::ObjectId.from_string(@id)).update_one(params)
   end
 
   def destroy
