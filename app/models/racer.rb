@@ -33,7 +33,7 @@ class Racer
     @secs = params[:secs].to_i
   end
 
-  def self.all(prototype={}, sort={}, skip=0, limit=nil)
+  def self.all(prototype={}, sort={:number=>1}, skip=0, limit=nil)
     results = collection.find(prototype).sort(sort).skip(skip)
     results = results.limit(limit) if !limit.nil?
 
@@ -41,31 +41,14 @@ class Racer
   end
 
   def self.find id
-    result = collection.find(_id: id).first
+    result = collection.find(:_id => BSON::ObjectId.from_string(id)).first
     return result.nil? ? nil : Racer.new(result)
   end
 
-  def self.paginate(params)
-    page = (params[:page] || 1).to_i
-    limit = (params[:per_page] || 30).to_i
-    skip = (page-1)*limit
-    sort = {'number': 1}
-
-    racers=[]
-    all({}, sort, skip, limit).each do |doc|
-      racers << Racer.new(doc)
-    end
-
-    total = all({}, sort, 0, 1).count
-    WillPaginate::Collection.create(page, limit, total) do |pager|
-      pager.replace(racers)
-    end
-  end
-
   def save
-    result = self.class.collection.insert_one(_id: @id, number: @number, first_name: @first_name,
+    result = self.class.collection.insert_one(number: @number, first_name: @first_name,
                       last_name: @last_name, gender: @gender, group: @group, secs: @secs)
-    @id = result.inserted_id
+    @id = result.inserted_id.to_s
   end
 
   def update(params)
@@ -84,4 +67,22 @@ class Racer
   def destroy
     self.class.collection.find(_id: BSON.ObjectId(@id)).delete_one
   end
+
+  def self.paginate(params)
+    page = (params[:page] || 1).to_i
+    limit = (params[:per_page] || 30).to_i
+    skip = (page-1)*limit
+    sort = {'number': 1}
+
+    racers=[]
+    all({}, sort, skip, limit).each do |doc|
+      racers << Racer.new(doc)
+    end
+
+    total = collection.count
+    WillPaginate::Collection.create(page, limit, total) do |pager|
+      pager.replace(racers)
+    end
+  end
+
 end
